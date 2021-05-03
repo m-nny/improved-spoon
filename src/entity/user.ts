@@ -1,4 +1,11 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn
+} from 'typeorm';
+import { Follow } from './follow';
 
 @Entity()
 export class User extends BaseEntity {
@@ -10,4 +17,10 @@ export class User extends BaseEntity {
 
   @Column()
   lastName: string;
+
+  @OneToMany(() => Follow, (follow) => follow.followingUser)
+  isFollowing?: Follow[];
+
+  @OneToMany(() => Follow, (follow) => follow.followedUser)
+  followedBy?: Follow[];
 }
