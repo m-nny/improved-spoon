@@ -1,46 +1,36 @@
-import * as express from 'express';
-import { Request, Response } from 'express';
-import { createConnection } from 'typeorm';
+import AdminBroExpress from '@admin-bro/express';
+import { Database, Resource } from '@admin-bro/typeorm';
+import AdminBro from 'admin-bro';
+import express from 'express';
+import { Express } from 'express-serve-static-core';
+import { Connection, createConnection } from 'typeorm';
+import { addCRUD } from './addCRUD';
 import { User } from './entity/user';
 
-// create typeorm connection
-createConnection().then((connection) => {
-  const userRepository = connection.getRepository(User);
+AdminBro.registerAdapter({ Database, Resource });
 
-  // create and setup express app
+function useAdminBro(app: Express, connection: Connection) {
+  const adminBro = new AdminBro({
+    databases: [connection],
+    // resources: [{ resource: User, options: { parent: { name: 'foobar' } } }],
+    rootPath: '/admin',
+  });
+  const router = AdminBroExpress.buildRouter(adminBro);
+  app.use(adminBro.options.rootPath, router);
+}
+
+async function runApp() {
+  const connection = await createConnection();
+
   const app = express();
   app.use(express.json());
 
-  // register routes
+  useAdminBro(app, connection);
+  addCRUD(app, connection);
 
-  app.get('/users', async function (req: Request, res: Response) {
-    const users = await userRepository.find();
-    res.json(users);
+  app.listen(3000, () => {
+      console.log('Listening on http://localhost:3000');
+      console.log('Admin panel at http://localhost:3000/admin');
   });
-
-  app.get('/users/:id', async function (req: Request, res: Response) {
-    const results = await userRepository.findOne(req.params.id);
-    return res.send(results);
-  });
-
-  app.post('/users', async function (req: Request, res: Response) {
-    const user = await userRepository.create(req.body);
-    const results = await userRepository.save(user);
-    return res.send(results);
-  });
-
-  app.put('/users/:id', async function (req: Request, res: Response) {
-    const user = await userRepository.findOne(req.params.id);
-    userRepository.merge(user, req.body);
-    const results = await userRepository.save(user);
-    return res.send(results);
-  });
-
-  app.delete('/users/:id', async function (req: Request, res: Response) {
-    const results = await userRepository.delete(req.params.id);
-    return res.send(results);
-  });
-
-  // start express server
-  app.listen(3000);
-});
+}
+runApp();

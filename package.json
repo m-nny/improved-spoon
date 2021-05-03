@@ -6,10 +6,16 @@
   "author": "Alibek Manabayev <m-nny@yandex.ru>",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/app.ts"
+    "start": "ts-node src/app.ts",
+    "dev": "ts-node-dev src/app.ts"
   },
   "dependencies": {
+    "@admin-bro/express": "^3.1.0",
+    "@admin-bro/typeorm": "^1.4.0",
+    "admin-bro": "^4.0.1",
     "express": "^4.17.1",
+    "express-formidable": "^1.2.0",
+    "express-session": "^1.17.1",
     "pg": "^8.6.0",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.32"
